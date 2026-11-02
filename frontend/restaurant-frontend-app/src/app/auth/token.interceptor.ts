@@ -20,10 +20,11 @@ export const tokenInterceptor: HttpInterceptorFn = (
   // IMPORTANT: do not modify Guest endpoints at all.
   // Guest flow uses a different token (guest session token) and we must not touch the body.
   // Otherwise we break POST /guest/sessions payload.
-  if (req.url.includes('/guest/')) {
+  const ownerGroupSessions = /\/guest\/groups\/[^/?]+\/sessions(?:\/[^/?]+)?(?:\?|$)/.test(req.url);
+  if (req.url.includes('/guest/') && !ownerGroupSessions) {
     return next(req).pipe(
       catchError((error: HttpErrorResponse) => {
-        console.log(error);
+        if (req.context.get(SKIP_ERROR_TOAST)) return throwError(() => error);
 
         let errorMessage = 'An unexpected error occurred.';
         if (error.error && typeof error.error === 'string') {

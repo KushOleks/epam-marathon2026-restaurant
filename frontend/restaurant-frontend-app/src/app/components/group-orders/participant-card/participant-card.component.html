@@ -1,0 +1,19 @@
+<article class="card">
+  <header><h2>{{ title() }}</h2>
+    @if (canRemove() && participant().type === 'Guest') {
+      <button type="button" class="remove" [attr.aria-label]="'Remove ' + participant().name" (click)="removeClick.emit(participant())">Remove Guest</button>
+    }
+  </header>
+  <p class="status" [class.submitted]="participant().isSubmitted">{{ participant().isSubmitted ? 'Submitted' : 'Still choosing' }}</p>
+  @if (participant().items.length) {
+    <ul class="items">
+      @for (item of participant().items; track item.dish.id) {
+        <li>@if (item.dish.imageUrl) { <img [src]="item.dish.imageUrl" [alt]="item.dish.name" width="40" height="40" /> } @else { <span class="avatar" aria-hidden="true">{{ item.dish.name.slice(0, 1) }}</span> }
+          <span class="name">{{ item.dish.name }} <small>× {{ item.quantity }}</small></span>
+          <strong>{{ item.dish.price * item.quantity | currency }}</strong>
+        </li>
+      }
+    </ul>
+  } @else { <p class="empty">No dishes yet</p> }
+  <footer><span>Subtotal</span><strong>{{ participant().total | currency }}</strong></footer>
+</article>

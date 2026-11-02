@@ -15,6 +15,11 @@ import { AdminGuard } from './auth/guards/admin.guard';
 
 export const routes: Routes = [
   {
+    path: 'reservations/:reservationId/group-order',
+    canActivate: [AuthGuard], data: { authorized: true },
+    loadComponent: () => import('./pages/group-order-page/group-order-page.component').then((module) => module.GroupOrderPageComponent),
+  },
+  {
     canActivate: [AuthGuard],
     data: { authorized: false },
     path: 'signup',

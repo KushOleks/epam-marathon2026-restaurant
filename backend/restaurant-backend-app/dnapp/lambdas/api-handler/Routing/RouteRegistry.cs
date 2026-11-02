@@ -1,3 +1,4 @@
+using APIHandler.Services.GroupOrders;
 using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Amazon.DynamoDBv2;
@@ -115,6 +116,8 @@ public static class RouteRegistry
         services.AddSingleton<IGuestAuthorizationService, GuestAuthorizationService>();
         services.AddSingleton<IReportService, ReportService>();
 
+        services.AddSingleton<OwnerGroupOrderService>();
+        services.AddSingleton<IGroupOrderCommitter, DynamoGroupOrderCommitter>();
         var provider = services.BuildServiceProvider();
 
         List<RouteHandler> GetAuthAndUserRoutes() => [
@@ -194,7 +197,7 @@ public static class RouteRegistry
             new RouteHandler(new Route(HttpMethods.GET, "/guest/groups/{groupReservationId}/status"), ActivatorUtilities.CreateInstance<GetGroupReservationStatusHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.GET, "/guest/invites/{token}"), ActivatorUtilities.CreateInstance<GetGroupReservationHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.GET, "/reservations/{reservationId}/invite-token"), ActivatorUtilities.CreateInstance<GetInviteTokenHandler>(provider)),
-            new RouteHandler(new Route(HttpMethods.DELETE, "/guest/groups/{groupReservationId}/sessions/{guestSessionId}"), ActivatorUtilities.CreateInstance<DeleteGuestSessionHandler>(provider))
+            new RouteHandler(new Route(HttpMethods.DELETE, "/guest/groups/{groupReservationId}/sessions/{guestSessionId}"), ActivatorUtilities.CreateInstance<OwnerGroupOrderHandler>(provider))
         ];
         List<RouteHandler> GetAuxiliaryRoutes() => [
             new RouteHandler(new Route(HttpMethods.GET, "/feedback"), ActivatorUtilities.CreateInstance<GetFeedbackForLocationHandler>(provider)),
@@ -207,7 +210,12 @@ public static class RouteRegistry
             new RouteHandler(new Route(HttpMethods.PATCH, "/notifications/{id}/read"), ActivatorUtilities.CreateInstance<MarkNotificationReadHandler>(provider))
         ];
 
-        var allRoutes = new List<RouteHandler>();
+        var allRoutes = new List<RouteHandler> {
+            new(new Route(HttpMethods.GET, "/guest/groups/{groupReservationId}/sessions"), ActivatorUtilities.CreateInstance<OwnerGroupOrderHandler>(provider)),
+            new(new Route(HttpMethods.GET, "/reservations/{reservationId}/guest-session-id"), ActivatorUtilities.CreateInstance<OwnerGroupOrderHandler>(provider)),
+            new(new Route(HttpMethods.GET, "/reservations/{reservationId}/group-order"), ActivatorUtilities.CreateInstance<OwnerGroupOrderHandler>(provider)),
+            new(new Route(HttpMethods.POST, "/group-reservations/{groupReservationId}/submit"), ActivatorUtilities.CreateInstance<OwnerGroupOrderHandler>(provider)),
+        };
         allRoutes.AddRange(GetAuthAndUserRoutes());
         allRoutes.AddRange(GetLocationTableAndWaiterRoutes());
         allRoutes.AddRange(GetDishRoutes());

@@ -1,3 +1,4 @@
+using APIHandler.Repositories.GroupReservations;
 using Amazon.Lambda.Core;
 using APIHandler.Constants;
 using APIHandler.Constants.Dishes;
@@ -22,17 +23,19 @@ public class OrderService : IOrderService
     private readonly IReservationRepository _reservationRepository;
     private readonly IDishService _dishService;
     private readonly INotificationService _notificationService;
+    private readonly IGroupReservationRepository? _groups;
 
     public OrderService(
         IOrderRepository orderRepository,
         IReservationRepository reservationRepository,
         IDishService dishService,
-        INotificationService notificationService)
+        INotificationService notificationService, IGroupReservationRepository? groups = null)
     {
         _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
         _reservationRepository = reservationRepository ?? throw new ArgumentNullException(nameof(reservationRepository));
         _dishService = dishService ?? throw new ArgumentNullException(nameof(dishService));
         _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+        _groups = groups;
     }
 
     public async Task<IEnumerable<Order>> GetOrdersByCustomerIdAsync(string customerId)
@@ -88,6 +91,7 @@ public class OrderService : IOrderService
 
     public async Task AddOrderAsync(Order order)
     {
+        await RequireGroupOpenAsync(order.ReservationId);
         var reservation = await LoadReservationAsync(order.ReservationId);
         EnsurePreOrderEditable(reservation.StartTime);
 
@@ -129,6 +133,7 @@ public class OrderService : IOrderService
         List<OrderItem> newDishes,
         ILambdaContext context)
     {
+        await RequireGroupOpenAsync(reservationId);
         await EditPreOrderInternalAsync(
             reservationId,
             newDishes,
@@ -167,6 +172,7 @@ public class OrderService : IOrderService
 
     public async Task CancelPreOrderAsync(string customerId, string reservationId, ILambdaContext context)
     {
+        await RequireGroupOpenAsync(reservationId);
         var reservation = await LoadReservationAsync(reservationId);
 
         if (!string.Equals(reservation.CustomerId, customerId, StringComparison.OrdinalIgnoreCase))
@@ -183,6 +189,7 @@ public class OrderService : IOrderService
 
     public async Task SubmitPreOrderAsync(string customerId, string reservationId, ILambdaContext context)
     {
+        await RequireGroupOpenAsync(reservationId);
         var reservation = await LoadReservationAsync(reservationId);
 
         if (!string.Equals(reservation.CustomerId, customerId, StringComparison.OrdinalIgnoreCase))
@@ -199,6 +206,7 @@ public class OrderService : IOrderService
 
     public async Task UnSubmitPreOrderAsync(string customerId, string reservationId, ILambdaContext context)
     {
+        await RequireGroupOpenAsync(reservationId);
         var reservation = await LoadReservationAsync(reservationId);
 
         if (!string.Equals(reservation.CustomerId, customerId, StringComparison.OrdinalIgnoreCase))
@@ -346,4 +354,12 @@ public class OrderService : IOrderService
 
         return anyConfirmed && !anyPending;
     }
+    private async Task RequireGroupOpenAsync(string reservationId)
+    {
+        if (_groups is null) return;
+        var group = await _groups.GetByReservationIdAsync(reservationId);
+        if (group is not null && group.Status != GroupReservationStatus.Open)
+            throw new ValidationException("The group pre-order is read-only after submission or closure.");
+    }
+
 }
