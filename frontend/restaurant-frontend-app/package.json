@@ -1,6 +1,6 @@
 {
   "name": "restaurant-frontend-app",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "author": "EPAM",
   "repository": {
     "type": "git",
@@ -22,7 +22,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "lint-fix": "ng lint --fix",
-    "format": "prettier --write \"src/**/*.{ts,html,scss}\""
+    "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
+    "test:hw": "ng test --watch=false --browsers=ChromeHeadless --include=\"src/app/components/group-orders/**/*.spec.ts\" --include=\"src/app/pages/group-order-page/**/*.spec.ts\" --include=\"src/app/services/group-orders/**/*.spec.ts\" --include=\"src/app/shared/helpers/consolidate-pre-order.spec.ts\" --include=\"src/app/auth/token.interceptor.group-orders.spec.ts\""
   },
   "private": true,
   "engines": {
