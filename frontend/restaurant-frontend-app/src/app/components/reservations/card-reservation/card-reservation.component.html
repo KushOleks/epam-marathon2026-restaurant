@@ -295,5 +295,5 @@
 }
 
 @if (r().guestCount >= 2) {
-  <a class="group-order-link" [href]="'/reservations/' + r().id + '/group-order'">Group Pre-Order</a>
+  <button type="button" class="group-order-link" (click)="groupDrawer.open(r().id)">Group Pre-Order</button>
 }

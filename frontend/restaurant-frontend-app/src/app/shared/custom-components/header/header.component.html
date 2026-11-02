@@ -24,6 +24,7 @@
 
     @if (user()?.role === Roles.CUSTOMER) {
       <a routerLink="/reservations" class="nav-link" [routerLinkActive]="'active'">Reservations</a>
+      <button type="button" class="nav-link group-drawer-link" (click)="groupDrawer.open(); closeMobileMenu()">Group Pre-Orders</button>
     }
 
     @if (user()?.role === Roles.WAITER) {

@@ -1,3 +1,4 @@
+import { GroupOrderDrawerService } from '@app/services/group-orders/group-order-drawer.service';
 import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -44,6 +45,7 @@ interface WaiterPreOrderNavigationData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardReservationComponent {
+  readonly groupDrawer = inject(GroupOrderDrawerService);
   private readonly router = inject(Router);
   readonly Roles = Roles;
   readonly ReservationStatusCustomer = ReservationStatusCustomer;

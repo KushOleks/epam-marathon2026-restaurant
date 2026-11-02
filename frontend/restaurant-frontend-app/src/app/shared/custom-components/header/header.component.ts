@@ -1,3 +1,4 @@
+import { GroupOrderDrawerService } from '@app/services/group-orders/group-order-drawer.service';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, signal, computed, effect, inject } from '@angular/core';
 import { Roles } from '@app/shared/constants/roles';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -19,6 +20,7 @@ import { GuestPreorderStore } from '@app/pages/guest-pre-order-page/state/guest-
   standalone: true,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  readonly groupDrawer = inject(GroupOrderDrawerService);
   private readonly POLLING_INTERVAL = 60000; // 60 sec
   private isDestroyed = false;
 

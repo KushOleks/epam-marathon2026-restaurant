@@ -1,15 +1,18 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { GroupOrderDrawerService } from './services/group-orders/group-order-drawer.service';
+import { GroupOrderDrawerComponent } from './components/group-orders/group-order-drawer/group-order-drawer.component';
 import { RouterOutlet } from '@angular/router';
 import {} from './auth/components/register/register.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, GroupOrderDrawerComponent],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
+  readonly groupDrawer = inject(GroupOrderDrawerService);
   title = 'restaurant-frontend-app';
 
   // constructor(private reportService: ReportsService) {

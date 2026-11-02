@@ -1,0 +1,18 @@
+<div class="overlay">
+  <button class="backdrop" type="button" aria-label="Close group pre-orders" (click)="close()" [disabled]="busy()"></button>
+  <aside role="dialog" aria-modal="true" aria-labelledby="group-drawer-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" (keydown.escape)="escape($event)">
+    <header><h2 id="group-drawer-title">Group Pre-Orders</h2><button type="button" cdkFocusInitial aria-label="Close panel" (click)="close()" [disabled]="busy()">✕</button></header>
+    <div class="content">
+      @if (drawer.reservationId(); as id) {
+        <nav><button type="button" (click)="back()" [disabled]="busy()">← Choose reservation</button><a [routerLink]="['/reservations', id, 'group-order']" (click)="close()" [attr.aria-disabled]="busy()" [class.disabled]="busy()">Open full page ↗</a></nav>
+        <app-group-order-page [reservationId]="id" [embedded]="true" />
+      } @else {
+        <p class="intro">Choose a reservation to review your guests’ dishes and send one shared order.</p>
+        @if (loading()) { <p role="status">Loading reservations…</p> }
+        @else if (failed()) { <p role="alert">Could not load reservations.</p><button type="button" (click)="load()">Try again</button> }
+        @else if (!reservations().length) { <p>No group reservations yet. Book a table for two or more guests to get started.</p><a routerLink="/tables" (click)="close()">Book a table</a> }
+        @else { <ul>@for (reservation of reservations(); track reservation.id) { <li><button class="reservation" type="button" (click)="drawer.reservationId.set(reservation.id)"><strong>{{ reservation.locationAddress }}</strong><span>{{ reservation.startTime | date:'MMM d, y · HH:mm' }} · {{ reservation.guestCount }} guests</span><span>View group pre-order →</span></button></li> }</ul> }
+      }
+    </div>
+  </aside>
+</div>

@@ -161,3 +161,5 @@
 }
 
 .group-order-link { display: inline-block; margin: 12px 20px; color: color.$green-800; font-weight: 600; text-decoration: underline; }
+
+button.group-order-link { border: 0; background: none; font: inherit; cursor: pointer; padding: 0; }

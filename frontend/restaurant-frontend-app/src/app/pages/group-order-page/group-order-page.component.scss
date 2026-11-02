@@ -8,3 +8,5 @@ button { border: 1px solid color.$green-800; color: color.$green-800; border-rad
 @media (max-width: 600px) { .page { padding: 24px 16px; } h1 { font-size: 24px; } .heading { gap: 10px; } .consolidated { padding: 16px; } .metadata { flex-direction: column; gap: 8px; } }
 
 .metadata span { display: inline-flex; gap: 8px; align-items: center; } .primary:disabled { background: color.$neutral-200; border-color: color.$neutral-200; color: color.$neutral-600; opacity: 1; }
+
+:host.embedded { min-height: 0; } :host.embedded .page { padding: 0; } :host.embedded .heading { margin-top: 0; }

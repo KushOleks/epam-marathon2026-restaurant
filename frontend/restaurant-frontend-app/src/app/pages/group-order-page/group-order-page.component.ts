@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, input, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { EMPTY, Subscription, catchError, exhaustMap, finalize, forkJoin, interval, switchMap, tap } from 'rxjs';
@@ -13,7 +13,7 @@ import { ParticipantCardComponent } from '@app/components/group-orders/participa
 import { ModalComponent } from '@app/shared/custom-components/modal/modal.component';
 
 @Component({
-  selector: 'app-group-order-page', imports: [CurrencyPipe, DatePipe, ParticipantCardComponent, ModalComponent],
+  selector: 'app-group-order-page', host: { '[class.embedded]': 'embedded()' }, imports: [CurrencyPipe, DatePipe, ParticipantCardComponent, ModalComponent],
   templateUrl: './group-order-page.component.html', styleUrl: './group-order-page.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
 })
@@ -21,7 +21,9 @@ export class GroupOrderPageComponent implements OnInit, OnDestroy {
   private readonly service = inject(GroupOrdersService);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
-  private readonly reservationId = this.route.snapshot.paramMap.get('reservationId') ?? '';
+  readonly selectedReservationId = input('', { alias: 'reservationId' });
+  readonly embedded = input(false);
+  private get reservationId(): string { return this.selectedReservationId() || this.route.snapshot.paramMap.get('reservationId') || ''; }
   readonly editOrderHref = computed(() => '/menu?preOrder=true&reservationId=' + encodeURIComponent(this.reservationId) + '&reservationLabel=' + encodeURIComponent(this.invite()?.LocationAddress ?? 'this reservation'));
   readonly loading = signal(true);
   readonly error = signal('');
