@@ -8,6 +8,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { interval, Subscription } from 'rxjs';
 import { NotificationsService } from '@app/services/notifications/notifications.service';
 import { Notification } from '@app/models/notifications/notification.model';
+import { CartActivityService } from '@app/services/pre-orders/cart-activity.service';
 import { CartComponent } from '@app/components/cart/cart.component';
 import { GuestPreorderStore } from '@app/pages/guest-pre-order-page/state/guest-preorder.store';
 
@@ -21,6 +22,7 @@ import { GuestPreorderStore } from '@app/pages/guest-pre-order-page/state/guest-
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   readonly groupDrawer = inject(GroupOrderDrawerService);
+  readonly cartActivity = inject(CartActivityService);
   private readonly POLLING_INTERVAL = 60000; // 60 sec
   private isDestroyed = false;
 
@@ -181,6 +183,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   toggleCart() {
+    this.cartActivity.acknowledge();
     this.showCart.update((v) => !v);
   }
 }

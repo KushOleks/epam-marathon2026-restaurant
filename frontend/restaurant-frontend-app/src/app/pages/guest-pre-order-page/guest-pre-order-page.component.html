@@ -24,8 +24,9 @@
         }
     </div>
 
-    <button type="button" class="cart-btn" (click)="openCart()" aria-label="Open cart">
+    <button type="button" class="cart-btn" [class.cart-nudge]="cartNeedsReview()" (click)="openCart()" aria-label="Review cart and submit pre-order">
         <img src="assets/svg/cart-empty.svg" alt="" />
+        <span>{{ cartNeedsReview() ? 'Review cart' : 'Cart' }} · {{ store.cartItems().length }} items</span>
     </button>
 </div>
 

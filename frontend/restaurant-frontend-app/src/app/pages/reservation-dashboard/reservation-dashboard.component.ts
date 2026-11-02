@@ -22,6 +22,7 @@ import {
 import { AuthenticationService } from '@app/auth/services/authentication.service';
 import { CardReservationComponent } from '@app/components/reservations/card-reservation/card-reservation.component';
 import { FeedbackWindowComponent } from '@app/components/reservations/feedback-window/feedback-window.component';
+import { ReservationInviteModalComponent } from '@app/components/reservations/reservation-invite-modal/reservation-invite-modal.component';
 import { ReservationConfirmedComponent } from '@app/components/reservations/reservation-confirmed/reservation-confirmed.component';
 import { MakeReservationComponent } from '@app/components/tables/make-reservation/make-reservation.component';
 import { FeedbackUpdatedEvent } from '@app/models/feedbacks/feedback.model';
@@ -57,7 +58,7 @@ interface ReservationStatusView {
     RouterLink,
     CardReservationComponent,
     MakeReservationComponent,
-    ReservationConfirmedComponent,
+    ReservationConfirmedComponent, ReservationInviteModalComponent,
     FeedbackWindowComponent,
   ],
   templateUrl: './reservation-dashboard.component.html',
@@ -96,6 +97,10 @@ export class ReservationDashboardComponent implements OnInit {
   readonly showEditReservationModal = signal(false);
   readonly showEditReservationConfirmed = signal(false);
   readonly showFeedbackModal = signal(false);
+  readonly inviteReservation = signal<Reservation | null>(null);
+  openInvite(reservation: ReservationCustomer): void {
+    this.inviteReservation.set({ ...reservation, status: reservation.status as unknown as ReservationStatus, tableCapacity: reservation.guestCount, customerId: reservation.customerId ?? '' });
+  }
 
   readonly statusEnum: Record<number, ReservationStatusView> = {
     [ReservationStatusCustomer.Reserved]: {

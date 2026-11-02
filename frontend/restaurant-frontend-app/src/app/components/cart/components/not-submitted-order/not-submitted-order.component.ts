@@ -19,6 +19,7 @@ import { Order } from '@app/models/orders/order.model';
 })
 export class NotSubmittedOrderComponent {
   readonly order = input.required<Order>();
+  readonly busy = input(false);
 
   readonly submitted = output<string>();
   readonly addDish = output<void>();

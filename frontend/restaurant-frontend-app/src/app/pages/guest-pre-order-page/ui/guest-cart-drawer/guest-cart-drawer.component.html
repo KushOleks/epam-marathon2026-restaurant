@@ -48,7 +48,7 @@
                                     <img src="assets/svg/trash.svg" alt="" />
                             </button>
 
-                            <div class="price">{{ it.price | currency: '$' }}</div>
+                            <div class="price">{{ it.price * it.qty | currency: '$' }}</div>
                             </div>
                         </div>
                     }

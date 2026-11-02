@@ -3,11 +3,13 @@ import {
   Component,
   DestroyRef,
   OnInit,
-  computed,
+  computed, effect,
   inject,
   output,
   signal,
 } from '@angular/core';
+import { Subscription, finalize } from 'rxjs';
+import { CartActivityService } from '@app/services/pre-orders/cart-activity.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
@@ -42,6 +44,14 @@ export class CartComponent implements OnInit {
   readonly closeCartEvent = output<void>();
 
   readonly orders = signal<Order[]>([]);
+  readonly activity = inject(CartActivityService);
+  readonly saving = signal(false);
+  readonly loading = signal(false);
+  readonly loadFailed = signal(false);
+  readonly busy = computed(() => this.saving() || this.loading() || this.activity.pendingAdditions() > 0);
+  private loadRequest?: Subscription;
+  constructor() { effect(() => { if (this.activity.revision() > 0) this.loadOrders(); }); }
+
 
   readonly cancelOrderId = signal<string | null>(null);
   readonly submitOrderId = signal<string | null>(null);
@@ -107,21 +117,24 @@ export class CartComponent implements OnInit {
   }
 
   cancelOrder(orderId: string): void {
+    if (this.busy()) return;
     const order = this.findOrder(orderId);
 
     if (!order) {
       return;
     }
 
+    this.saving.set(true);
     this.preOrdersService
       .cancelPreOrderByReservationId(order.reservationId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(finalize(() => this.saving.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.closeCancelModal();
           this.loadOrders();
         },
         error: (error) => {
+          this.loadOrders();
           console.error(
             `Error cancelling order ${orderId}:`,
             error,
@@ -131,20 +144,23 @@ export class CartComponent implements OnInit {
   }
 
   editOrder(orderId: string): void {
+    if (this.busy()) return;
     const order = this.findOrder(orderId);
 
     if (!order) {
       return;
     }
 
+    this.saving.set(true);
     this.preOrdersService
       .unsubmitPreOrderByReservationId(order.reservationId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(finalize(() => this.saving.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.loadOrders();
         },
         error: (error) => {
+          this.loadOrders();
           console.error(
             `Error un-submitting order ${orderId}:`,
             error,
@@ -154,21 +170,24 @@ export class CartComponent implements OnInit {
   }
 
   submitOrder(orderId: string): void {
+    if (this.busy()) return;
     const order = this.findOrder(orderId);
 
     if (!order) {
       return;
     }
 
+    this.saving.set(true);
     this.preOrdersService
       .submitPreOrderByReservationId(order.reservationId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(finalize(() => this.saving.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.submitOrderId.set(orderId);
           this.loadOrders();
         },
         error: (error) => {
+          this.loadOrders();
           console.error(
             `Error submitting order ${orderId}:`,
             error,
@@ -178,8 +197,10 @@ export class CartComponent implements OnInit {
   }
 
   addDishToOrder(orderId: string): void {
-    console.log(`Adding a dish to order ${orderId}`);
-    void this.router.navigate(['/menu']);
+    const order = this.findOrder(orderId);
+    if (!order || this.busy()) return;
+    this.closeCart();
+    void this.router.navigate(['/menu'], { queryParams: { preOrder: true, reservationId: order.reservationId, reservationLabel: order.reservationAddress } });
   }
 
   updateDishQuantity(
@@ -187,7 +208,7 @@ export class CartComponent implements OnInit {
     itemId: string,
     quantity: number,
   ): void {
-    if (quantity <= 0) {
+    if (this.busy() || quantity <= 0) {
       return;
     }
 
@@ -209,17 +230,20 @@ export class CartComponent implements OnInit {
       ),
     };
 
+    this.orders.update(orders => orders.map(order => order.orderId === updatedOrder.orderId ? updatedOrder : order));
+    this.saving.set(true);
     this.preOrdersService
       .editPreOrderByReservationId(
         updatedOrder.reservationId,
         updatedOrder,
       )
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(finalize(() => this.saving.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.loadOrders();
         },
         error: (error) => {
+          this.loadOrders();
           console.error(
             `Error updating item ${itemId}:`,
             error,
@@ -232,6 +256,7 @@ export class CartComponent implements OnInit {
     orderId: string,
     itemId: string,
   ): void {
+    if (this.busy()) return;
     const originalOrder = this.findOrder(orderId);
 
     if (!originalOrder) {
@@ -245,17 +270,20 @@ export class CartComponent implements OnInit {
       ),
     };
 
+    this.orders.update(orders => orders.map(order => order.orderId === updatedOrder.orderId ? updatedOrder : order));
+    this.saving.set(true);
     this.preOrdersService
       .editPreOrderByReservationId(
         updatedOrder.reservationId,
         updatedOrder,
       )
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(finalize(() => this.saving.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.loadOrders();
         },
         error: (error) => {
+          this.loadOrders();
           console.error(
             `Error removing item ${itemId}:`,
             error,
@@ -276,18 +304,14 @@ export class CartComponent implements OnInit {
     return order;
   }
 
-  private loadOrders(): void {
-    this.preOrdersService
-      .getPreOrders()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+  loadOrders(): void {
+    this.loadRequest?.unsubscribe();
+    this.loading.set(true); this.loadFailed.set(false);
+    this.loadRequest = this.preOrdersService.getPreOrders()
+      .pipe(finalize(() => this.loading.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (orders) => {
-          this.orders.set(orders);
-        },
-        error: (error) => {
-          console.error('Error loading orders:', error);
-          this.orders.set([]);
-        },
+        next: orders => this.orders.set(orders),
+        error: () => this.loadFailed.set(true),
       });
   }
 }

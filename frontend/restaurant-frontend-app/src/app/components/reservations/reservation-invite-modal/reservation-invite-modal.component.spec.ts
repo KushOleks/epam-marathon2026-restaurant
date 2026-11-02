@@ -158,6 +158,6 @@ describe('ReservationInviteModalComponent', () => {
     element.querySelector<HTMLButtonElement>('.pre-order-btn')!.click();
 
     expect(component.closed.emit).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/menu']);
+    expect(router.navigate).toHaveBeenCalledWith(['/menu'], { queryParams: { preOrder: true, reservationId: 'res-1', reservationLabel: '48 Rustaveli Avenue' } });
   });
 });

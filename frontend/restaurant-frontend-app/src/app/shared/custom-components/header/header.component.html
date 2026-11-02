@@ -52,7 +52,7 @@
       @if (user()?.role === Roles.CUSTOMER && !isGuestPreorderRoute) {
         @if (!showCart()) {
           <div>
-            <button type="button" class="icon-button icon-button--large" (click)="toggleCart()">
+            <button type="button" class="icon-button icon-button--large cart-review-trigger" [class.cart-nudge]="cartActivity.needsReview()" [attr.aria-label]="cartActivity.needsReview() ? 'Review your cart and submit your pre-order' : 'Open cart'" (click)="toggleCart()">
               <img src="assets/svg/cart-empty.svg" alt="cart icon" class="action-icon" />
               <h5> Cart</h5>
             </button>
@@ -145,12 +145,13 @@
     }
 
     @if (user()?.role === Roles.CUSTOMER && !isGuestPreorderRoute) {
-      <button class="icon-button icon-button--small" type="button"  (click)="toggleCart()">
+      <button class="icon-button icon-button--small cart-review-trigger" type="button" [class.cart-nudge]="cartActivity.needsReview()" [attr.aria-label]="cartActivity.needsReview() ? 'Review your cart and submit your pre-order' : 'Open cart'" (click)="toggleCart()">
         <img
           [src]="'assets/svg/cart-empty.svg'"
           alt="cart icon"
           class="action-icon"
         />
+        @if (cartActivity.needsReview()) { <span class="cart-review-label">Review cart</span> }
       </button>
     }
 

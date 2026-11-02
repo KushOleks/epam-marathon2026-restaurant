@@ -36,6 +36,24 @@ public class GroupReservationServiceTests
             _locationServiceMock.Object);
     }
 
+    [Fact]
+    public async Task InviteToken_AfterSingleReservationBecomesGroup_CreatesMissingGroup()
+    {
+        var reservation = new Reservation { Id = "res-expanded", TableId = "table-1", WaiterId = "waiter-1", GuestCount = 3, Status = ReservationStatus.Reserved };
+        _reservationRepositoryMock.Setup(r => r.GetReservationByIdAsync(reservation.Id)).ReturnsAsync(reservation);
+        _groupReservationRepositoryMock.Setup(r => r.GetByReservationIdAsync(reservation.Id)).ReturnsAsync((GroupReservation?)null);
+        GroupReservation? saved = null;
+        _groupReservationRepositoryMock.Setup(r => r.SaveGroupReservationAsync(It.IsAny<GroupReservation>()))
+            .Callback<GroupReservation>(group => saved = group).Returns(Task.CompletedTask);
+
+        var result = await _service.GetGroupReservationInviteTokenAsync(reservation.Id);
+
+        Assert.NotNull(saved);
+        Assert.Equal(reservation.Id, saved.ReservationId);
+        Assert.Equal(GroupReservationStatus.Open, saved.Status);
+        Assert.Equal(saved.ReservationToken, result.Token);
+    }
+
     [Theory]
     [AutoData]
     public async Task GetGroupReservationByTokenAsync_ValidInput_ReturnsGroupReservationInfo(

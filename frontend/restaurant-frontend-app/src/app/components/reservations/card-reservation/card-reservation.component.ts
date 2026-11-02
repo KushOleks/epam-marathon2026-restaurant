@@ -71,6 +71,7 @@ export class CardReservationComponent {
     newTableId: string;
   }>();
 
+  readonly inviteGuests = output<ReservationCustomer>();
   readonly cancelReservation = output<string>();
 
   readonly editReservation =

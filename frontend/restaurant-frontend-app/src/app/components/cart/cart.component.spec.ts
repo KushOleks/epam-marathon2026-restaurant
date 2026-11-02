@@ -1,3 +1,4 @@
+import { Subject } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -125,4 +126,24 @@ describe('CartComponent', () => {
       '/reservations',
     ]);
   });
+  it('keeps reservation context when adding another dish', () => {
+    component.orders.set([{ orderId: 'order-1', reservationId: 'reservation-1', reservationAddress: 'Test restaurant', reservationTime: 'Nov 6', status: 0, orderItems: [] } as Order]);
+    spyOn(component.closeCartEvent, 'emit');
+    component.addDishToOrder('order-1');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/menu'], { queryParams: { preOrder: true, reservationId: 'reservation-1', reservationLabel: 'Test restaurant' } });
+    expect(component.closeCartEvent.emit).toHaveBeenCalled();
+  });
+
+  it('updates quantities and totals together and blocks repeated writes until saved', () => {
+    const pending = new Subject<object>();
+    preOrdersServiceMock.editPreOrderByReservationId.and.returnValue(pending);
+    component.orders.set([{ orderId: 'order-1', reservationId: 'reservation-1', orderItems: [{ dish: { id: 'dish-1', price: 14 }, quantity: 1 }] } as Order]);
+    component.updateDishQuantity('order-1', 'dish-1', 2);
+    expect(component.orders()[0].orderItems[0].quantity).toBe(2);
+    expect(component.busy()).toBeTrue();
+    component.updateDishQuantity('order-1', 'dish-1', 3);
+    expect(preOrdersServiceMock.editPreOrderByReservationId.calls.count()).toBe(1);
+    pending.next({}); pending.complete(); expect(component.busy()).toBeFalse();
+  });
+
 });
