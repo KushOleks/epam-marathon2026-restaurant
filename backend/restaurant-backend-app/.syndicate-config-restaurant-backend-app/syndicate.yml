@@ -1,0 +1,4 @@
+account_id: "YOUR_AWS_ACCOUNT_ID" #replace with your AWS account ID
+region: "eu-north-1"
+project_path: "/absolute/path/to/backend/restaurant-backend-app" #replace with your project path
+deploy_target_bucket: "marathon2026-restaurant-artifacts-YOUR_AWS_ACCOUNT_ID" #replace with your S3 bucket name
