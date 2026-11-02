@@ -82,7 +82,8 @@ export class GuestPreOrderPageComponent {
         });
     }
 
-    openCart() { this.isCartOpen.set(true); }
+    readonly cartNeedsReview = signal(false);
+    openCart() { this.cartNeedsReview.set(false); this.isCartOpen.set(true); }
     closeCart() { this.isCartOpen.set(false); }
 
     retryInviteLoad(): void {
@@ -107,6 +108,7 @@ export class GuestPreOrderPageComponent {
         });
 
         if (added) {
+            this.cartNeedsReview.set(true);
             this.toast.success(`${dish.name} added to your pre-order.`, 'Added');
         }
     }

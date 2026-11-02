@@ -1,7 +1,10 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { GuestInviteService } from '@app/services/reservation/guest-invite.service';
+import { ToastService } from '@app/services/toast/toast.service';
 import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
-  Component,
+  Component, DestroyRef, OnInit, inject,
   input,
   output,
   signal,
@@ -27,7 +30,26 @@ import { CustomButtonComponent } from '@app/shared/custom-components/custom-butt
     '[class.fade-out]': 'isFading()',
   },
 })
-export class ReservationConfirmedComponent {
+export class ReservationConfirmedComponent implements OnInit {
+  private readonly invites = inject(GuestInviteService);
+  private readonly toast = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
+  readonly inviteLink = signal('');
+  readonly inviteLoading = signal(false);
+  readonly inviteError = signal(false);
+  ngOnInit(): void { if (this.reservation().guestCount >= 2) this.loadInvite(); }
+  loadInvite(): void {
+    this.inviteLoading.set(true); this.inviteError.set(false);
+    this.invites.getInviteToken$(this.reservation().id, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ token }) => { this.inviteLink.set(`${window.location.origin}/join/${token}`); this.inviteLoading.set(false); },
+      error: () => { this.inviteLoading.set(false); this.inviteError.set(true); },
+    });
+  }
+  async copyInvite(): Promise<void> {
+    try { await navigator.clipboard.writeText(this.inviteLink()); this.toast.success('Share this link with your guests.', 'Link copied'); }
+    catch { this.toast.error('Please copy the invitation link manually.'); }
+  }
+
   readonly reservation = input.required<Reservation>();
   readonly customClass = input('');
 

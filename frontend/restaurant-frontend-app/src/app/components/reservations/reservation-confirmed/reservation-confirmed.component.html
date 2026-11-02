@@ -93,11 +93,20 @@
       </p>
     </div>
 
+    @if (reservation().guestCount >= 2) {
+      <section class="invite-section" aria-label="Guest invitation">
+        <label for="updated-reservation-invite">Invite your guests</label>
+        <p>Share this link with the additional guests so they can choose their dishes.</p>
+        @if (inviteLoading()) { <p role="status">Loading invitation…</p> }
+        @else if (inviteError()) { <p role="status">Invitations may be unavailable for a submitted or closed group.</p><button type="button" (click)="loadInvite()">Retry invitation</button> }
+        @else { <div class="invite-link"><input id="updated-reservation-invite" readonly [value]="inviteLink()" /><button type="button" (click)="copyInvite()">Copy link</button></div> }
+      </section>
+    }
     <div class="confirmed-buttons">
       <app-custom-button
         type="button"
         variant="secondary"
-        size="large"
+        size="large" [fullWidth]="true"
         (click)="onCancel()"
       >
         Cancel Reservation
@@ -106,7 +115,7 @@
       <app-custom-button
         type="button"
         variant="primary"
-        size="large"
+        size="large" [fullWidth]="true"
         (click)="onEdit()"
       >
         Edit Reservation

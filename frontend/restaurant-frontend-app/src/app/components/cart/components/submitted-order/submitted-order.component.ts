@@ -19,6 +19,7 @@ import { Order } from '@app/models/orders/order.model';
 })
 export class SubmittedOrderComponent {
   readonly order = input.required<Order>();
+  readonly busy = input(false);
 
   readonly canceled = output<void>();
   readonly edited = output<void>();

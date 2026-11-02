@@ -20,6 +20,7 @@
         [statusEnum]="statusEnum"
         (cancelReservation)="cancelReservation($event)"
         (editReservation)="openEditModal($event)"
+        (inviteGuests)="openInvite($event)"
         (leaveFeedbackReservation)="openFeedback($event)"
         (updateFeedbackReservation)="openFeedback($event)"
       />
@@ -92,3 +93,5 @@
     (closedFeedback)="closeFeedback()"
   />
 }
+
+@if (inviteReservation(); as reservation) { <app-reservation-invite-modal [reservation]="reservation" title="Invite your guests" (closed)="inviteReservation.set(null)" /> }

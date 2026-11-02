@@ -33,6 +33,7 @@ export class ReservationInviteModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly reservation = input.required<Reservation>();
+  readonly title = input('Reservation Confirmed');
 
   readonly closed = output<void>();
 
@@ -106,6 +107,6 @@ export class ReservationInviteModalComponent implements OnInit {
 
   onMakePreOrder(): void {
     this.closed.emit();
-    this.router.navigate(['/menu']);
+    this.router.navigate(['/menu'], { queryParams: { preOrder: true, reservationId: this.reservation().id, reservationLabel: this.reservation().locationAddress } });
   }
 }

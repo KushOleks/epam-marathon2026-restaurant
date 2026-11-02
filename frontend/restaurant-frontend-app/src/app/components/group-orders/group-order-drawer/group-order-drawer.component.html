@@ -4,7 +4,7 @@
     <header><h2 id="group-drawer-title">Group Pre-Orders</h2><button type="button" cdkFocusInitial aria-label="Close panel" (click)="close()" [disabled]="busy()">✕</button></header>
     <div class="content">
       @if (drawer.reservationId(); as id) {
-        <nav><button type="button" (click)="back()" [disabled]="busy()">← Choose reservation</button><a [routerLink]="['/reservations', id, 'group-order']" (click)="close()" [attr.aria-disabled]="busy()" [class.disabled]="busy()">Open full page ↗</a></nav>
+        <nav><button type="button" (click)="back()" [disabled]="busy()">← Choose reservation</button><a [routerLink]="['/reservations', id, 'group-order']" (click)="close()" [attr.aria-disabled]="busy()" [class.disabled]="busy()">Open full page</a></nav>
         <app-group-order-page [reservationId]="id" [embedded]="true" />
       } @else {
         <p class="intro">Choose a reservation to review your guests’ dishes and send one shared order.</p>

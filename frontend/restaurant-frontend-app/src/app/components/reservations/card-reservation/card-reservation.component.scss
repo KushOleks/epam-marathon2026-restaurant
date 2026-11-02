@@ -160,6 +160,10 @@
   line-height: 1rem;
 }
 
-.group-order-link { display: inline-block; margin: 12px 20px; color: color.$green-800; font-weight: 600; text-decoration: underline; }
 
-button.group-order-link { border: 0; background: none; font: inherit; cursor: pointer; padding: 0; }
+
+.group-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid color.$neutral-200; }
+.group-order-button { flex: 1; min-width: 160px; min-height: 40px; }
+.invite-button { border: 0; background: none; color: color.$green-800; font: inherit; padding: 10px 4px; cursor: pointer; }
+.cancel-reservation-button { color: color.$red-400; border: 1px solid color.$neutral-200; background: color.$neutral-0; text-decoration: none; border-radius: 8px; }
+.cancel-reservation-button:hover { border-color: color.$red-400; }

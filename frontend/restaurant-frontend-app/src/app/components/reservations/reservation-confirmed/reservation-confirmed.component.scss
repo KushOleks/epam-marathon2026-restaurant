@@ -32,7 +32,9 @@
   background-color: color.$neutral-100;
   border: 1px solid color.$shadow;
   border-radius: 1.5rem;
-  width: 25%;
+  width: min(620px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -82,3 +84,11 @@
   margin-top: 20px;
   justify-content: space-between;
 }
+
+.confirmed-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.confirmed-buttons app-custom-button { min-width: 0; }
+.invite-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid color.$neutral-200; font-size: 14px; }
+.invite-section label { font-weight: 600; } .invite-section p { margin: 8px 0 12px; }
+.invite-link { display: flex; gap: 8px; } .invite-link input { min-width: 0; flex: 1; padding: 10px; border: 1px solid color.$neutral-200; border-radius: 8px; }
+.invite-section button { padding: 10px 14px; border: 1px solid color.$green-800; border-radius: 8px; color: color.$green-800; background: color.$neutral-0; cursor: pointer; white-space: nowrap; }
+@media (max-width: 600px) { .confirmed-buttons { grid-template-columns: 1fr; } .confirmed-wrapper { padding: 20px; } }

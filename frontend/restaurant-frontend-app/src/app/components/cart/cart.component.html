@@ -32,13 +32,15 @@
       </button>
     </div>
 
+    @if (busy()) { <p role="status">Saving and refreshing your cart…</p> }
+    @if (loadFailed()) { <p role="alert">Could not refresh the cart. <button type="button" (click)="loadOrders()">Try again</button></p> }
     @if (unsubmittedOrders().length > 0) {
       <div class="orders-list">
         <div class="list-header">
           <h3>Not submitted pre-orders</h3>
 
           <span class="body">
-            You have not submitted pre-orders
+            Review each reservation below, then submit its pre-order.
           </span>
         </div>
 
@@ -47,7 +49,7 @@
           track item.orderId
           ) {
           <app-not-submitted-order
-            [order]="item"
+            [order]="item" [busy]="busy()"
             (submitted)="submitOrder($event)"
             (removeDish)="
               removeDishFromOrder(item.orderId, $event)
@@ -82,7 +84,7 @@
             track item.orderId
             ) {
             <app-submitted-order
-              [order]="item"
+              [order]="item" [busy]="busy()"
               (canceled)="openCancelModal(item.orderId)"
               (edited)="editOrder(item.orderId)"
             />
@@ -91,7 +93,7 @@
       </div>
     }
 
-    @if (orders().length === 0) {
+    @if (!loading() && !loadFailed() && orders().length === 0) {
       <div class="empty-cart">
         <img
           src="assets/img/empty-cart.png"

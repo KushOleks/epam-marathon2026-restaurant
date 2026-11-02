@@ -38,3 +38,10 @@
   border: 1px solid color.$blue-400 !important;
   color: color.$blue-400 !important;
 }
+
+.cart-nudge { animation: cart-attention 1s ease-in-out 3; border-radius: 12px; box-shadow: 0 0 0 2px color.$green-600; }
+.cart-review-label { font-size: 12px; font-weight: 600; color: color.$green-800; white-space: nowrap; }
+@keyframes cart-attention { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(0,160,0,.15); } }
+@media (prefers-reduced-motion: reduce) { .cart-nudge { animation: none; } }
+
+button.cart-review-trigger { width: auto; min-width: 32px; gap: 8px; padding: 8px; }

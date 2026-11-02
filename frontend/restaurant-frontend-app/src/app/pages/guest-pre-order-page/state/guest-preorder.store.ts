@@ -50,6 +50,8 @@ export class GuestPreorderStore {
     readonly menuError = signal<string | null>(null);
     readonly cartBusy = signal(false);
     readonly cartError = signal<string | null>(null);
+    private quantityQueue: Promise<void> = Promise.resolve();
+    private pendingChanges = 0;
 
     readonly menuByCategory = signal<Record<string, GuestMenuDish[]>>({});
     readonly menuCategories = computed(() => Object.keys(this.menuByCategory()));
@@ -340,9 +342,10 @@ export class GuestPreorderStore {
             this.cartError.set('Your guest session has expired. Please rejoin the reservation.');
             return false;
         }
-        if (this.cartBusy()) return false;
-
+        if (this.status() !== 'active') return false;
+        this.pendingChanges++;
         this.cartBusy.set(true);
+        const result = this.quantityQueue.then(async () => {
         this.cartError.set(null);
         try {
             const request = operation === 'add'
@@ -355,8 +358,12 @@ export class GuestPreorderStore {
             this.cartError.set('Could not update your cart. Please try again.');
             return false;
         } finally {
-            this.cartBusy.set(false);
+            this.pendingChanges--;
+            this.cartBusy.set(this.pendingChanges > 0);
         }
+        });
+        this.quantityQueue = result.then(() => undefined, () => undefined);
+        return result;
     }
 
     private clearStorage(ctx: string) {
